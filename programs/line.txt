@@ -1,0 +1,16 @@
+{
+While(True){
+Light in;
+if((in<=0)&(0<=in)){
+Forward;
+}
+if((in<=2)&(2<=in)){
+Turn_left;
+}
+if((in<=1)&(1<=in)){
+Turn_right;
+}
+if((in<=3)&(3<=in)){
+Wait;
+}
+}

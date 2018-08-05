@@ -1,0 +1,16 @@
+{
+Call flag 0;
+While(True){
+if((flag<=0)&(0<=flag)){
+Call flag 1;
+Lamp 1 255 0 0;
+Lamp 2 0 0 255;
+}
+if((flag<=1)&(1<=flag)){
+Call flag 0;
+Lamp 1 0 0 255;
+Lamp 2 255 0 0;
+}
+Wait;
+}
+}

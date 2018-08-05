@@ -1,0 +1,10 @@
+{
+if((Var iets <= 3)){
+	Wait;
+}
+Call iets 5;
+if((Var iets <= 3)){
+	#Hier laat ik de robot naar links draaien#
+	Turn_left;
+}
+}

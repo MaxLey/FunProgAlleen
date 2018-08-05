@@ -1,0 +1,7 @@
+MOVE_FORWARD
+WHILE TRUE:
+	IF readUltrasonicSensor < 10:
+		TURN_LEFT
+		WAIT 3
+		MOVE_FORWARD
+		

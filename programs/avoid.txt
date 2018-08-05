@@ -1,0 +1,12 @@
+{
+Call grens 30;
+While(True){
+Dist see;
+if((see<=grens)){
+Turn_right;
+}
+if((grens<=see)){
+Forward;
+}
+}
+}
