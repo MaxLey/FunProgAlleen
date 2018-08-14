@@ -25,16 +25,16 @@ import Control.Monad.IO.Class
 main = do {
     --evalStateT (runPgm $ parse parsePgm ("{Call iets 5;Call nogiets 3;Forward;Wait;if(((Var iets) <= 3)){Wait;Lamp 1 255 0 0;Light lightValue;Dist distanceValue;}}")) [("test",Lit 2)]
     --{if((Var iets <= 3)){Wait;}Call iets 5;if((Var iets <= 3)){Turn_left;}}
-    readpgm <- readFile "pgm2.txt";
+    readpgm <- readFile "pgm.txt";
     evalStateT (runPgm $ parse parsePgm (rTnN readpgm)) [];
 }
 
 -- Remove tabs and Newlines
-rTnN :: [Char] -> [Char]
+rTnN :: String -> String
 rTnN ('\t':rest) = rTnN rest
 rTnN ('\r':rest) = rTnN rest
 rTnN ('\n':rest) = rTnN rest
-rTnN (x:rest)    = x:(rTnN rest)
+rTnN (x:rest)    = x:rTnN rest
 rTnN []          = []
 
 
@@ -74,7 +74,7 @@ runCmd Comment = liftIO (print "There is a comment here")
 runCmd (Call a b) = do {
     -- lst <- get
     -- io vs liftIO?
-    liftIO (print ("Calling"));
+    liftIO (print "Calling");
     lst <- get;
     put (addToEnv a (Lit (evalNmr b lst)) lst);
     lst2 <- get;
@@ -85,25 +85,25 @@ runCmd (Call a b) = do {
 -- runCmd (Check a b) = liftIO (print "Check command")
 runCmd (Check a b) = do {
     e <- get;
-    liftIO (print ("Check!"));
-    liftIO (print ("e is:"));
+    liftIO (print "Check!");
+    liftIO (print "e is:");
     liftIO (print (show e));
-    liftIO (print ("a is:"));
+    liftIO (print "a is:");
     liftIO (print (show a));
-    if (evalCon a e) then (runPgm b) else return ()
+    if evalCon a e then runPgm b else return ()
 }
 runCmd (While a b) = do {
     e <- get;
-    if (evalCon a e) then do {runPgm b;runCmd (While a b);} else return ()
+    if evalCon a e then do {runPgm b;runCmd (While a b);} else return ()
 }
 runCmd (Robo a) = runRobo a
 
 runRobo :: Robocmd -> MyMonad ()
-runRobo Turn_Left    = liftIO (print ("Robot turning left"))
-runRobo Turn_Right   = liftIO (print ("Robot turning right"))
-runRobo Forward      = liftIO (print ("Robot going forward"))
-runRobo Stop         = liftIO (print ("Robot stopping"))
-runRobo (Lamp a b c d) = liftIO (print ("Setting robot lamp: " ++ (show a) ++ (show b) ++ (show c) ++ (show d)))
+runRobo Turn_Left    = liftIO (print "Robot turning left")
+runRobo Turn_Right   = liftIO (print "Robot turning right")
+runRobo Forward      = liftIO (print "Robot going forward")
+runRobo Stop         = liftIO (print "Robot stopping")
+runRobo (Lamp a b c d) = liftIO (print ("Setting robot lamp: " ++ show a ++ show b ++ show c ++ show d))
 runRobo (Light a)      = do {
     liftIO (print ("Saving the default light value of 1 to " ++ a));
     runCmd (Call a (Lit 1));
