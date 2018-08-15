@@ -2,10 +2,10 @@
 Call grens 30;
 while(True){
 	Dist see;
-	if((see <= grens)){
+	if((Var see <= Var grens)){
 		Turn_right;
 	}
-	if((grens <= see)){
+	if((Var grens <= Var see)){
 		Forward;
 	}
 	Wait 1;

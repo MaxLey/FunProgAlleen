@@ -16,7 +16,7 @@ import System.HIDAPI
 main = do {
     --evalStateT (runPgm $ parse parsePgm ("{Call iets 5;Call nogiets 3;Forward;Wait;if(((Var iets) <= 3)){Wait;Lamp 1 255 0 0;Light lightValue;Dist distanceValue;}}")) [("test",Lit 2)]
     --{if((Var iets <= 3)){Wait;}Call iets 5;if((Var iets <= 3)){Turn_left;}}
-    readpgm <- readFile "pgm3.txt";
+    readpgm <- readFile "avoid.txt";
     bot <- openMBot;
     evalStateT (runPgm (parse parsePgm (rTnN readpgm)) bot) [];
     closeMBot bot
@@ -80,17 +80,20 @@ runCmd (Robo a) bot = runRobo a bot
 -- runRobo stelt de uitvoering van een Robocmd voor, een commando dat interreageert met de robot.
 -- De motor-waarden staan op 150 omdat tijdens het testen 255 nogal snel was. Dit kan aangepast worden om de robot sneller te laten rijden/draaien.
 runRobo :: Robocmd -> Device -> EnvIO ()
-runRobo TurnLeft bot    = do{
+runRobo (TurnLeft a) bot    = do{
+    lst <- get;
     liftIO (print "Robot turning left");
-    liftIO (sendCommand bot $ setMotor 0 150)
+    liftIO (sendCommand bot $ setMotor 0 (evalNmr a lst))
 }
-runRobo TurnRight bot   = do{
+runRobo (TurnRight a) bot   = do{
+    lst <- get;
     liftIO (print "Robot turning right");
-    liftIO (sendCommand bot $ setMotor 150 0)
+    liftIO (sendCommand bot $ setMotor (evalNmr a lst) 0)
 }
-runRobo Forward bot      = do{
+runRobo (Forward a) bot      = do{
+    lst <- get;
     liftIO (print "Robot going forward");
-    liftIO (sendCommand bot $ setMotor 150 150)
+    liftIO (sendCommand bot $ setMotor (evalNmr a lst) (evalNmr a lst)) -- Where clause?
 }
 runRobo Stop bot         = do{
     liftIO (print "Robot stopping");

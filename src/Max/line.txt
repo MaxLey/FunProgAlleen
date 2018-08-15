@@ -1,17 +1,18 @@
 {
-While(True){
+while(True){
+	#Wait 1;#
 	Light in;
 	if((Var in == 0)){
-		Forward;
+		Forward 100;
 	}
 	if((Var in == 1)){
-		Turn_left;
+		Turn_left 80;
 	}
-	if((Var in == 2){
-		Turn_right;
+	if((Var in == 2)){
+		Turn_right 80;
 	}
-	if((Var in == 3){
-		Wait 1;
+	if((Var in == 3)){
+		Stop;
 	}
 }
 }

@@ -1,5 +1,5 @@
 {
-While(True){
+while(True){
 	Lamp 1 255 0 0;
 	Lamp 2 0 0 255;
 	Wait 5;
