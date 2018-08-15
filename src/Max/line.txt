@@ -1,0 +1,17 @@
+{
+While(True){
+	Light in;
+	if((Var in == 0)){
+		Forward;
+	}
+	if((Var in == 1)){
+		Turn_left;
+	}
+	if((Var in == 2){
+		Turn_right;
+	}
+	if((Var in == 3){
+		Wait 1;
+	}
+}
+}
