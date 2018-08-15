@@ -1,16 +1,17 @@
 {
 While(True){
-Light in;
-if((in<=0)&(0<=in)){
-Forward;
-}
-if((in<=2)&(2<=in)){
-Turn_left;
-}
-if((in<=1)&(1<=in)){
-Turn_right;
-}
-if((in<=3)&(3<=in)){
-Wait;
+	Light in;
+	if((Var in == 0)){
+		Forward;
+	}
+	if((Var in == 1)){
+		Turn_left;
+	}
+	if((Var in == 2){
+		Turn_right;
+	}
+	if((Var in == 3){
+		Wait 1;
+	}
 }
 }
