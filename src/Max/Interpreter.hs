@@ -66,9 +66,9 @@ runCmd (Check a b) bot = do {
     e <- get;
     liftIO (print "Check statement");
     liftIO (print "Current env state:");
-    liftIO (print (show e));
+    liftIO (print e);
     liftIO (print "Condition to evaluate:");
-    liftIO (print (show a));
+    liftIO (print a);
     if evalCon a e then runPgm b bot else return ()
 }
 runCmd (While a b) bot = do {
@@ -97,12 +97,10 @@ runRobo Stop bot         = do{
     liftIO (sendCommand bot $ setMotor 0 0)
 }
 runRobo (Lamp a b c d) bot = do{
-    --liftIO (print ("Setting robot lamp: " ++ show a ++ show b ++ show c ++ show d))
     lst <- get;
     liftIO (sendCommand bot $ setRGB (evalNmr a lst) (evalNmr b lst) (evalNmr c lst) (evalNmr d lst))
 }
 runRobo (Light a) bot      = do {
-    --liftIO (print ("Saving the default light value of 1 to " ++ a));
     liftIO (print "Reading the line sensor");
     lin <- liftIO (readLineFollower bot);
     runCmd (Call a (Lit (lineToInt lin))) bot

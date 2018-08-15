@@ -28,10 +28,12 @@ evalNmr (Var n)     e   = evalNmr (findvar n e) e
 
 -- Deze functie evalueert een "Con" tot een Haskell Bool
 evalCon :: Con -> Env -> Bool
-evalCon (Boolean x) e    = x
-evalCon (Inv x)     e    = not (evalCon x e)
-evalCon (a :&: b)   e    = evalCon a e && evalCon b e
-evalCon (a :|: b)   e    = evalCon a e || evalCon b e
-evalCon (a :<=: b)  e    = evalNmr a e <= evalNmr b e
-evalCon (a :>=: b)  e    = evalNmr a e >= evalNmr b e
-evalCon (a :==: b)  e    = evalNmr a e == evalNmr b e
+evalCon (Boolean x) e   = x
+evalCon (Inv x)     e   = not (evalCon x e)
+evalCon (a :&: b)   e   = evalCon a e && evalCon b e
+evalCon (a :|: b)   e   = evalCon a e || evalCon b e
+evalCon (a :<=: b)  e   = evalNmr a e <= evalNmr b e
+evalCon (a :<: b)   e   = evalNmr a e <  evalNmr b e
+evalCon (a :>=: b)  e   = evalNmr a e >= evalNmr b e
+evalCon (a :>: b)   e   = evalNmr a e >  evalNmr b e
+evalCon (a :==: b)  e   = evalNmr a e == evalNmr b e
