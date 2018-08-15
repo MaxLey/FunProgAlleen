@@ -11,7 +11,7 @@ main = do {
     --evalStateT (runPgm $ parse parsePgm ("{Call iets 5;Call nogiets 3;Forward;Wait;if(((Var iets) <= 3)){Wait;Lamp 1 255 0 0;Light lightValue;Dist distanceValue;}}")) [("test",Lit 2)]
     --{if((Var iets <= 3)){Wait;}Call iets 5;if((Var iets <= 3)){Turn_left;}}
     readpgm <- readFile "pgm3.txt";
-    print (show (apply   parsePgm (rTnN readpgm)));
+    print (show (apply parsePgm (rTnN readpgm)));
 
 }
 

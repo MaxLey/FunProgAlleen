@@ -1,7 +1,15 @@
 {
 Dist distinp;
-Wait 5;
-while(True){
-	Wait 20;
+Wait 1;
+Call iets 3;
+if((1 == 1)){
+	Call ja 1;
+}
+if((2 == 1)){
+	Call nee 1;
+}
+while((Var iets <= 6)){
+	Wait 10;
+	Call iets (Var iets+1);
 }
 }
