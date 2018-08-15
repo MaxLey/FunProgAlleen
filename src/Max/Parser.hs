@@ -110,5 +110,5 @@ parseInt = parseNat `mplus` parseNeg
 -- Match a word
 -- TODO maybe
 parseWord :: Parser String
-parseWord = do { s <- plus (spot (\s -> (s /= ' ') && (s /= ')')));
+parseWord = do { s <- plus (spot (\s -> (s /= ' ') && (s /= ')') && (s /= ';')));
                  return s }

@@ -11,7 +11,7 @@ import MonadPlus
 import ConParser
 import NmrParser
 
-data Cmd    = Wait
+data Cmd    = Wait Nmr
             | Comment
             | Call Name Nmr
             | Check Con [Cmd] -- Cmd (voor else)
@@ -36,8 +36,10 @@ parseCmd = parseWait `mplus` parseCall
                      `mplus` parseRobo
                      `mplus` parseComment
     where
-    parseWait = do { match ("Wait;");           -- Parse een 'wait' commando
-                     return (Wait) }
+    parseWait = do { match ("Wait ");           -- Parse een 'wait' commando
+                     a <- parseNmr;
+                     token ';';
+                     return (Wait a) }
     parseCall = do { match ("Call ");           -- Parse een 'call' commando
                      a <- parseWord;
                      token ' ';

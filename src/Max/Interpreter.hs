@@ -6,6 +6,9 @@ import Evaluator (evalCon, evalNmr, addToEnv)
 import Control.Monad
 import Control.Monad.Trans.State
 import Control.Monad.IO.Class
+import Control.Concurrent
+import MBot
+import System.HIDAPI
 -- import Data.Text.IO as T
 -- import Mbot
 
@@ -25,8 +28,12 @@ import Control.Monad.IO.Class
 main = do {
     --evalStateT (runPgm $ parse parsePgm ("{Call iets 5;Call nogiets 3;Forward;Wait;if(((Var iets) <= 3)){Wait;Lamp 1 255 0 0;Light lightValue;Dist distanceValue;}}")) [("test",Lit 2)]
     --{if((Var iets <= 3)){Wait;}Call iets 5;if((Var iets <= 3)){Turn_left;}}
-    readpgm <- readFile "pgm.txt";
-    evalStateT (runPgm $ parse parsePgm (rTnN readpgm)) [];
+    readpgm <- readFile "pgm3.txt";
+    bot <- openMBot;
+    evalStateT (runPgm (parse parsePgm (rTnN readpgm)) bot) [];
+    closeMBot bot
+
+    
 }
 
 -- Remove tabs and Newlines
@@ -53,25 +60,29 @@ rTnN []          = []
 
 type MyMonad a = StateT Env IO a
 
-runPgm :: [Cmd] -> MyMonad ()
-runPgm [] = return ();
-runPgm (x:xs) = do { a <- runCmd x; -- Run een command en houd de IO bij in a
-                     runPgm xs;
---                     b <- runPgm xs; -- Run de andere commands en houd de IO bij in b
---                     lift (a >> b)
-                     } -- Maak een StateT Env IO () met de twee IO's in
-                        -- Het geheel resulteert in een StateT Env IO met erin de gecombineerde IO
-                        -- Is lift juist?
+runPgm :: [Cmd] -> Device -> MyMonad ()
+runPgm [] bot = return ();
+runPgm (x:xs) bot = do { a <- runCmd x bot; -- Run een command en houd de IO bij in a
+                         runPgm xs bot;
+--                         b <- runPgm xs; -- Run de andere commands en houd de IO bij in b
+--                         lift (a >> b)
+                         }  -- Maak een StateT Env IO () met de twee IO's in
+                            -- Het geheel resulteert in een StateT Env IO met erin de gecombineerde IO
+                            -- Is lift juist?
 
 -- De runCmd functie wordt opgeroepen per commando en geeft een StateT Env IO terug.
 -- Hierbij is er een State-deel die de State - onze environment - aanpast, en een
 -- IO deel, dat interfacing met de robot inhoudt.
 -- ZIe verdere beschrijving in het rapport
 
-runCmd :: Cmd -> MyMonad ()
-runCmd Wait = liftIO (print "Waiting")
-runCmd Comment = liftIO (print "There is a comment here")
-runCmd (Call a b) = do {
+runCmd :: Cmd -> Device -> MyMonad ()
+runCmd (Wait a) bot = do{
+    liftIO (print "Waiting");
+    lst <- get;
+    liftIO (threadDelay (100000 * (evalNmr a lst)))
+}
+runCmd Comment bot  = liftIO (print "There is a comment here")
+runCmd (Call a b) bot = do {
     -- lst <- get
     -- io vs liftIO?
     liftIO (print "Calling");
@@ -83,35 +94,61 @@ runCmd (Call a b) = do {
     -- return () 
     }
 -- runCmd (Check a b) = liftIO (print "Check command")
-runCmd (Check a b) = do {
+runCmd (Check a b) bot = do {
     e <- get;
     liftIO (print "Check!");
     liftIO (print "e is:");
     liftIO (print (show e));
     liftIO (print "a is:");
     liftIO (print (show a));
-    if evalCon a e then runPgm b else return ()
+    if evalCon a e then runPgm b bot else return ()
 }
-runCmd (While a b) = do {
+runCmd (While a b) bot = do {
     e <- get;
-    if evalCon a e then do {runPgm b;runCmd (While a b);} else return ()
+    if evalCon a e then do {runPgm b bot;runCmd (While a b) bot;} else return ()
 }
-runCmd (Robo a) = runRobo a
+runCmd (Robo a) bot = runRobo a bot
 
-runRobo :: Robocmd -> MyMonad ()
-runRobo Turn_Left    = liftIO (print "Robot turning left")
-runRobo Turn_Right   = liftIO (print "Robot turning right")
-runRobo Forward      = liftIO (print "Robot going forward")
-runRobo Stop         = liftIO (print "Robot stopping")
-runRobo (Lamp a b c d) = liftIO (print ("Setting robot lamp: " ++ show a ++ show b ++ show c ++ show d))
-runRobo (Light a)      = do {
-    liftIO (print ("Saving the default light value of 1 to " ++ a));
-    runCmd (Call a (Lit 1));
+runRobo :: Robocmd -> Device -> MyMonad ()
+runRobo Turn_Left bot    = do{
+    liftIO (print "Robot turning left");
+    liftIO (sendCommand bot $ setMotor 0 150)
 }
-runRobo (Dist a)       = do{
-    liftIO (print ("Saving the default distance value of 10 to " ++ a));
-    runCmd (Call a (Lit 10));
+runRobo Turn_Right bot   = do{
+    liftIO (print "Robot turning right");
+    liftIO (sendCommand bot $ setMotor 150 0)
 }
+runRobo Forward bot      = do{
+    liftIO (print "Robot going forward");
+    liftIO (sendCommand bot $ setMotor 150 150)
+}
+runRobo Stop bot         = do{
+    liftIO (print "Robot stopping");
+    liftIO (sendCommand bot $ setMotor 0 0)
+}
+runRobo (Lamp a b c d) bot = do{
+    --liftIO (print ("Setting robot lamp: " ++ show a ++ show b ++ show c ++ show d))
+    lst <- get;
+    liftIO (sendCommand bot $ setRGB (evalNmr a lst) (evalNmr b lst) (evalNmr c lst) (evalNmr d lst))
+}
+runRobo (Light a) bot      = do {
+    --liftIO (print ("Saving the default light value of 1 to " ++ a));
+    --runCmd (Call a (Lit 1)) bot;
+    liftIO (print "Reading the line sensor");
+    lin <- liftIO (readLineFollower bot);
+    runCmd (Call a (Lit (lineToInt lin))) bot
+}
+runRobo (Dist a) bot      = do{
+    liftIO (print "Reading the ultrasonic sensor");
+    val <- liftIO (readUltraSonic bot);
+    runCmd (Call a (Lit (round val))) bot
+}
+
+lineToInt :: Line -> Int
+lineToInt BOTHB = 0
+lineToInt LEFTB = 1
+lineToInt RIGHTB = 2
+lineToInt BOTHW = 3
 
 -- data StateIO s a = StateIO {
 --     runStateIO :: s -> (IO a, s)

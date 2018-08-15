@@ -1,0 +1,16 @@
+#Forward;Wait;#
+#Stop;Wait;#
+#Turn_left;Wait;#
+#Stop;Wait;#
+#Turn_right;Wait;#
+#Stop;#
+Light lightinp;
+Dist distinp;
+while(True){
+	Wait;
+	Lamp 1 100 0 0;
+	Lamp 2 0 0 100;
+	Wait;
+	Lamp 1 0 0 100;
+	Lamp 2 100 0 0;
+}
