@@ -20,8 +20,8 @@ data Cmd    = Wait Nmr
             deriving (Eq, Show)
 
 -- Dit zijn de commandos die daadwerkelijk interreageren met de robot.
-data Robocmd    = Turn_Left
-                | Turn_Right
+data Robocmd    = TurnLeft
+                | TurnRight
                 | Forward
                 | Stop
                 | Lamp Nmr Nmr Nmr Nmr
@@ -36,30 +36,30 @@ parseCmd = parseWait `mplus` parseCall
                      `mplus` parseRobo
                      `mplus` parseComment
     where
-    parseWait = do { match ("Wait ");           -- Parse een 'wait' commando
+    parseWait = do { match "Wait ";           -- Parse een 'wait' commando
                      a <- parseNmr;
                      token ';';
                      return (Wait a) }
-    parseCall = do { match ("Call ");           -- Parse een 'call' commando
+    parseCall = do { match "Call ";           -- Parse een 'call' commando
                      a <- parseWord;
                      token ' ';
                      b <- parseNmr;
                      token ';';
                      return (Call a b) }
-    parseCheck = do { match ("if(");            -- Parse een 'if' commando
+    parseCheck = do { match "if(";            -- Parse een 'if' commando
                       a <- parseCon;    -- De benaming is hier 'check' om conflict
                       token ')';        -- met Haskell te vermijden
                       b <- parsePgm;
                       return (Check a b) }
-    parseWhile = do { match ("while(");         -- Parse een 'while' commando
+    parseWhile = do { match "while(";         -- Parse een 'while' commando
                     a <- parseCon;
                     token ')';
                     b <- parsePgm;
                     return (While a b) }
     parseComment = do { token '#';                 -- Parse een comment line
-                        plus (spot (\s -> s /= '#'));
+                        plus (spot (/= '#'));
                         token '#';
-                        return (Comment) }
+                        return Comment }
 
 -- Deze parser parset de verschillende robot-commandos.
 parseRobo :: Parser Cmd
@@ -70,15 +70,15 @@ parseRobo = parseLeft `mplus` parseRight
                       `mplus` parseLight
                       `mplus` parseDist
     where
-    parseLeft   = do { match ("Turn_left;");
-                        return (Robo Turn_Left) }
-    parseRight  = do { match ("Turn_right;");
-                        return (Robo Turn_Right) }
-    parseFwd    = do { match ("Forward;");
+    parseLeft   = do { match "Turn_left;";
+                        return (Robo TurnLeft) }
+    parseRight  = do { match "Turn_right;";
+                        return (Robo TurnRight) }
+    parseFwd    = do { match "Forward;";
                         return (Robo Forward) }
-    parseStop   = do { match ("Stop;");
+    parseStop   = do { match "Stop;";
                         return (Robo Stop) }
-    parseLamp   = do { match ("Lamp ");
+    parseLamp   = do { match "Lamp ";
                         a <- parseNmr;
                         token ' ';
                         b <- parseNmr;
@@ -88,11 +88,11 @@ parseRobo = parseLeft `mplus` parseRight
                         d <- parseNmr;
                         token ';';
                         return (Robo (Lamp a b c d)) }
-    parseLight  = do { match ("Light ");
+    parseLight  = do { match "Light ";
                         a <- parseWord;
                         token ';';
                         return (Robo (Light a)) }
-    parseDist   = do { match ("Dist ");
+    parseDist   = do { match "Dist ";
                         a <- parseWord;
                         token ';';
                         return (Robo (Dist a)) }

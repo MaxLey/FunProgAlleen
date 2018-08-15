@@ -58,9 +58,9 @@ rTnN []          = []
 -- programma zijn.
 -- De state wordt maar bijgehouden zolang runPgm leeft
 
-type MyMonad a = StateT Env IO a
+type EnvIO a = StateT Env IO a
 
-runPgm :: [Cmd] -> Device -> MyMonad ()
+runPgm :: [Cmd] -> Device -> EnvIO ()
 runPgm [] bot = return ();
 runPgm (x:xs) bot = do { a <- runCmd x bot; -- Run een command en houd de IO bij in a
                          runPgm xs bot;
@@ -75,11 +75,11 @@ runPgm (x:xs) bot = do { a <- runCmd x bot; -- Run een command en houd de IO bij
 -- IO deel, dat interfacing met de robot inhoudt.
 -- ZIe verdere beschrijving in het rapport
 
-runCmd :: Cmd -> Device -> MyMonad ()
+runCmd :: Cmd -> Device -> EnvIO ()
 runCmd (Wait a) bot = do{
     liftIO (print "Waiting");
     lst <- get;
-    liftIO (threadDelay (100000 * (evalNmr a lst)))
+    liftIO (threadDelay (100000 * evalNmr a lst))
 }
 runCmd Comment bot  = liftIO (print "There is a comment here")
 runCmd (Call a b) bot = do {
@@ -109,12 +109,12 @@ runCmd (While a b) bot = do {
 }
 runCmd (Robo a) bot = runRobo a bot
 
-runRobo :: Robocmd -> Device -> MyMonad ()
-runRobo Turn_Left bot    = do{
+runRobo :: Robocmd -> Device -> EnvIO ()
+runRobo TurnLeft bot    = do{
     liftIO (print "Robot turning left");
     liftIO (sendCommand bot $ setMotor 0 150)
 }
-runRobo Turn_Right bot   = do{
+runRobo TurnRight bot   = do{
     liftIO (print "Robot turning right");
     liftIO (sendCommand bot $ setMotor 150 0)
 }

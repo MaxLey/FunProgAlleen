@@ -39,12 +39,12 @@ instance Monad Parser where
 
 -- Making Parser an instance of monadplus
 instance MonadPlus Parser where
-   mzero = Parser (\s -> [])
+   mzero = Parser (const [])
    mplus m n = Parser (\s -> apply m s ++ apply n s)
 
 -- Apply the parser (returns pair of parsed value and remaining string)
 apply :: Parser a -> String -> [(a, String)]
-apply (Parser f) s = f s
+apply (Parser f) = f 
 
 -- Return parsed value, assuming at least one successful parse
 parse :: Parser a -> String -> a
@@ -78,7 +78,7 @@ token c = spot (== c)
 --                 return (y:ys)
 --               }
 match :: String -> Parser String
-match xs = sequence (map token xs)
+match = mapM token
 
 -- Parsing sequences
 -- Create a parser to match zero or more occurences (of a given parser match)
@@ -110,5 +110,4 @@ parseInt = parseNat `mplus` parseNeg
 -- Match a word
 -- TODO maybe
 parseWord :: Parser String
-parseWord = do { s <- plus (spot (\s -> (s /= ' ') && (s /= ')') && (s /= ';')));
-                 return s }
+parseWord = plus (spot (\s -> (s /= ' ') && (s /= ')') && (s /= ';')));

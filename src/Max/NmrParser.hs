@@ -35,7 +35,7 @@ parseNmr = parseLit `mplus` parseAdd `mplus` parseMul `mplus` parseVar
                     b <- parseNmr;
                     token ')';
                     return (a :*: b) }
-    parseVar = do { match ("Var ");
+    parseVar = do { match "Var ";
                     a <- parseWord;
                     --token ')';
                     return (Var a) }
