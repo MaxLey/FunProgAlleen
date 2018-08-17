@@ -1,3 +1,6 @@
+-- Interpreter.hs
+-- Maximiliaan Leyman
+
 import CmdParser (Env, parseCmd, parsePgm, Cmd (..), Robocmd (..)   )
 import Parser
 import NmrParser (Nmr (..), Name)
@@ -10,18 +13,15 @@ import Control.Concurrent
 import MBot
 import System.HIDAPI
 
--- De main-methode bevat de daadwerkelijke uitvoering van een programma. Deze leest het programma, opent de robot, parset en voert het programma uit, en sluit de robot dan weer.
+-- De main-methode bevat de daadwerkelijke uitvoering van een programma. Deze leest het Hasky-programma uit een textfile, opent de robot,
+--   parset en voert het programma uit, en sluit de robot dan weer.
 -- Het programma om uit te voeren kan aangepast worden door de string bij readFile aan te passen.
 
 main = do {
-    --evalStateT (runPgm $ parse parsePgm ("{Call iets 5;Call nogiets 3;Forward;Wait;if(((Var iets) <= 3)){Wait;Lamp 1 255 0 0;Light lightValue;Dist distanceValue;}}")) [("test",Lit 2)]
-    --{if((Var iets <= 3)){Wait;}Call iets 5;if((Var iets <= 3)){Turn_left;}}
     readpgm <- readFile "avoid.txt";
     bot <- openMBot;
     evalStateT (runPgm (parse parsePgm (rTnN readpgm)) bot) [];
     closeMBot bot
-
-    
 }
 
 -- Remove tabs and Newlines
@@ -52,7 +52,7 @@ runCmd :: Cmd -> Device -> EnvIO ()
 runCmd (Wait a) bot = do{
     liftIO (print "Waiting");
     lst <- get;
-    liftIO (threadDelay (100000 * (evalNmr a lst)))
+    liftIO (threadDelay (100000 * evalNmr a lst))
 }
 runCmd Comment bot  = liftIO (print "There is a comment here")
 runCmd (Call a b) bot = do {
@@ -69,16 +69,17 @@ runCmd (Check a b) bot = do {
     liftIO (print e);
     liftIO (print "Condition to evaluate:");
     liftIO (print a);
-    if evalCon a e then runPgm b bot else return ()
+    when (evalCon a e) $ runPgm b bot
 }
 runCmd (While a b) bot = do {
     e <- get;
-    if evalCon a e then do {runPgm b bot;runCmd (While a b) bot;} else return ()
+    when (evalCon a e) $ do {runPgm b bot;runCmd (While a b) bot;}
 }
 runCmd (Robo a) bot = runRobo a bot
 
 -- runRobo stelt de uitvoering van een Robocmd voor, een commando dat interreageert met de robot.
--- De motor-waarden staan op 150 omdat tijdens het testen 255 nogal snel was. Dit kan aangepast worden om de robot sneller te laten rijden/draaien.
+-- De robot draait standard met een wiel vooruit en een wiel uit, maar dit kan redelijk gemakkelijk aangepast worden
+--   door de 0 te vervangen door het tegengestelde van de expressie ernaast.
 runRobo :: Robocmd -> Device -> EnvIO ()
 runRobo (TurnLeft a) bot    = do{
     lst <- get;
@@ -93,7 +94,7 @@ runRobo (TurnRight a) bot   = do{
 runRobo (Forward a) bot      = do{
     lst <- get;
     liftIO (print "Robot going forward");
-    liftIO (sendCommand bot $ setMotor (evalNmr a lst) (evalNmr a lst)) -- Where clause?
+    liftIO (sendCommand bot $ setMotor (evalNmr a lst) (evalNmr a lst))
 }
 runRobo Stop bot         = do{
     liftIO (print "Robot stopping");

@@ -1,3 +1,6 @@
+-- Evaluator.hs
+-- Maximiliaan Leyman
+
 module Evaluator
 ( evalNmr
 , evalCon
@@ -8,6 +11,7 @@ import Parser
 import MonadPlus
 import NmrParser (Nmr (..), Env, Name)
 import ConParser (Con (..))
+
 
 -- Deze functie zoekt een nummer op in de Env
 findvar :: Name -> Env -> Nmr
@@ -24,6 +28,7 @@ evalNmr (Lit n)     e   = n
 evalNmr (a :+: b)   e   = evalNmr a e + evalNmr b e
 evalNmr (a :-: b)   e   = evalNmr a e - evalNmr b e
 evalNmr (a :*: b)   e   = evalNmr a e * evalNmr b e
+evalNmr (a :/: b)   e   = evalNmr a e `quot` evalNmr b e
 evalNmr (Var n)     e   = evalNmr (findvar n e) e
 
 -- Deze functie evalueert een "Con" tot een Haskell Bool

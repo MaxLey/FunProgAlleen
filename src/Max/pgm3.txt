@@ -1,17 +1,17 @@
 {
-Dist distinp;
-Lamp 1 0 100 0;
-Lamp 2 0 0 100;
-Wait 1;
-Call iets 3;
+dist distinp;
+lamp 1 0 100 0;
+lamp 2 0 0 100;
+wait 1;
+call iets 3;
 if((2 >= (3-1))){
-	Call ja 1;
+	call ja 1;
 }
 if((1 >= 2)){
-	Call nee 1;
+	call nee 1;
 }
 while((Var iets <= 6)){
-	Wait 10;
-	Call iets (Var iets+1);
+	wait 10;
+	call iets (Var iets+1);
 }
 }

@@ -1,3 +1,6 @@
+-- ConParser.hs
+-- Maximiliaan Leyman
+
 module ConParser
 ( Con (..)
 , parseCon
@@ -8,6 +11,7 @@ import MonadPlus
 import NmrParser
 import Debug.Trace
 
+-- Dit gegevenstype stelt de verschillende vormen van logische expressies in Hasky voor
 data Con = Boolean Bool
         | Inv Con
         | Con :&: Con
@@ -19,6 +23,7 @@ data Con = Boolean Bool
         | Nmr :==: Nmr
         deriving (Eq, Show)
 
+-- Parse een Hasky Con-expressie
 parseCon :: Parser Con
 parseCon = parseBool `mplus` parseNot `mplus` parseAnd `mplus` parseOr `mplus` parseCmp
     where

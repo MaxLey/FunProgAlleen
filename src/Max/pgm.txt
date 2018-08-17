@@ -1,12 +1,12 @@
 {
-Call iets 2;
+call iets 2;
 if((Var iets <= 3)){
-	Wait;
+	wait 1;
 }
-Call iets 5;
+call iets 5;
 if((Var iets <= 3)){
 	#Hier laat ik de robot naar links draaien#
-	Turn_left;
+	turn_left;
 }
-while((Var iets <= 10)){Call iets (Var iets+1);}
+while((Var iets <= 10)){call iets (Var iets+1);}
 }

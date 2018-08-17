@@ -1,3 +1,6 @@
+-- CmdParser.hs
+-- Maximiliaan Leyman
+
 module CmdParser
 ( Cmd (..)
 , Robocmd (..)
@@ -11,12 +14,14 @@ import MonadPlus
 import ConParser
 import NmrParser
 
-data Cmd    = Wait Nmr
-            | Comment
-            | Call Name Nmr
-            | Check Con [Cmd] -- Cmd (voor else)
-            | While Con [Cmd]
-            | Robo Robocmd
+
+-- Dit gegevenstype stelt de verschillende commandos in Hasky voor
+data Cmd    = Wait Nmr          -- Wacht Nmr seconden
+            | Comment           -- Een comment - doet niks
+            | Call Name Nmr     -- Houd het meegegeven Nmr bij als variabele met als naam Name
+            | Check Con [Cmd]   -- Voert het [Cmd] blok uit als Con 'True' evalueert
+            | While Con [Cmd]   -- Voert het [Cmd] blok uit zolang Con 'True' evalueert
+            | Robo Robocmd      -- Voert het robot-commando Robocmd uit
             deriving (Eq, Show)
 
 -- Dit zijn de commandos die daadwerkelijk interreageren met de robot.
@@ -29,6 +34,7 @@ data Robocmd    = TurnLeft Nmr
                 | Dist Name
                 deriving (Eq, Show)
 
+-- Parse een enkel Hasky-commando
 parseCmd :: Parser Cmd
 parseCmd = parseWait `mplus` parseCall
                      `mplus` parseCheck 
@@ -36,24 +42,24 @@ parseCmd = parseWait `mplus` parseCall
                      `mplus` parseRobo
                      `mplus` parseComment
     where
-    parseWait = do { match "Wait ";           -- Parse een 'wait' commando
+    parseWait = do { match "wait ";           -- Parse een 'wait' commando
                      a <- parseNmr;
                      token ';';
                      return (Wait a) }
-    parseCall = do { match "Call ";           -- Parse een 'call' commando
+    parseCall = do { match "call ";           -- Parse een 'call' commando
                      a <- parseWord;
                      token ' ';
                      b <- parseNmr;
                      token ';';
                      return (Call a b) }
     parseCheck = do { match "if(";            -- Parse een 'if' commando
-                      a <- parseCon;    -- De benaming is hier 'check' om conflict
-                      token ')';        -- met Haskell te vermijden
+                      a <- parseCon;    -- De benaming is hier 'check' om verwarring te vermijden, aangezien zowel Haskell als mijn programmeertaal al 'if' in de code hebben.
+                      token ')';
                       b <- parsePgm;
                       return (Check a b) }
     parseWhile = do { match "while(";         -- Parse een 'while' commando
-                    a <- parseCon;
-                    token ')';
+                    a <- parseCon;      -- Hlint meldt dat duplication hier vermeden kan worden met Check - dit is waar, maar zou de structuur een beetje verbrodden en het
+                    token ')';          -- ingewikkelder maken dan om dit gewoon te laten staan.
                     b <- parsePgm;
                     return (While a b) }
     parseComment = do { token '#';                 -- Parse een comment line
@@ -61,7 +67,7 @@ parseCmd = parseWait `mplus` parseCall
                         token '#';
                         return Comment }
 
--- Deze parser parset de verschillende robot-commandos.
+-- Parse een commando dat met de robot interreageert.
 parseRobo :: Parser Cmd
 parseRobo = parseLeft `mplus` parseRight
                       `mplus` parseFwd
@@ -73,15 +79,15 @@ parseRobo = parseLeft `mplus` parseRight
                       `mplus` parseRightAmount
                       `mplus` parseFwdAmount
     where
-    parseLeft   = do { match "Turn_left;";
+    parseLeft   = do { match "turn_left;";
                         return (Robo (TurnLeft (Lit 150))) }
-    parseRight  = do { match "Turn_right;";
+    parseRight  = do { match "turn_right;";
                         return (Robo (TurnRight (Lit 150))) }
-    parseFwd    = do { match "Forward;";
+    parseFwd    = do { match "forward;";
                         return (Robo (Forward (Lit 150))) }
-    parseStop   = do { match "Stop;";
+    parseStop   = do { match "stop;";
                         return (Robo Stop) }
-    parseLamp   = do { match "Lamp ";
+    parseLamp   = do { match "lamp ";
                         a <- parseNmr;
                         token ' ';
                         b <- parseNmr;
@@ -91,27 +97,28 @@ parseRobo = parseLeft `mplus` parseRight
                         d <- parseNmr;
                         token ';';
                         return (Robo (Lamp a b c d)) }
-    parseLight  = do { match "Light ";
+    parseLight  = do { match "light ";
                         a <- parseWord;
                         token ';';
                         return (Robo (Light a)) }
-    parseDist   = do { match "Dist ";
+    parseDist   = do { match "dist ";
                         a <- parseWord;
                         token ';';
                         return (Robo (Dist a)) }
-    parseLeftAmount = do { match "Turn_left ";
+    parseLeftAmount = do { match "turn_left ";
                             a <- parseNmr;
                             token ';';
                             return (Robo (TurnLeft a)) }
-    parseRightAmount = do { match "Turn_right ";
+    parseRightAmount = do { match "turn_right ";
                             a <- parseNmr;
                             token ';';
                             return (Robo (TurnRight a)) }
-    parseFwdAmount  = do { match "Forward ";
+    parseFwdAmount  = do { match "forward ";
                             a <- parseNmr;
                             token ';';
                             return (Robo (Forward a)) }
 
+-- Parse een Hasky programma-blok, met accolades als delimiters
 parsePgm :: Parser [Cmd]
 parsePgm = do{  token '{';
                 res <- plus parseCmd;

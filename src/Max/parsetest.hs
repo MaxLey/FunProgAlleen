@@ -1,3 +1,6 @@
+-- parsetest.hs
+-- Maximiliaan Leyman
+
 import CmdParser (Env, parseCmd, parsePgm, Cmd (..), Robocmd (..)   )
 import Parser
 import NmrParser (Nmr (..), Name)
@@ -7,10 +10,13 @@ import Control.Monad
 import Control.Monad.Trans.State
 import Control.Monad.IO.Class
 
+
+-- Dit extra bestand dient om de parsing van een Hasky-programma te testen, zonder dit daadwerkelijk op de robot uit te voeren.
+-- Dit is vooral handig omdat de robot blokkeert als je (Hasky-)programma niet parset (en dus de main-methode uit Interpreter.hs geen programma heeft om uit te voeren), want de exception
+--  hiervan zorgt ervoor dat de robot nooit gesloten wordt, en het dan nodig is GHCi te herstarten om verder te kunnen.
+
 main = do {
-    --evalStateT (runPgm $ parse parsePgm ("{Call iets 5;Call nogiets 3;Forward;Wait;if(((Var iets) <= 3)){Wait;Lamp 1 255 0 0;Light lightValue;Dist distanceValue;}}")) [("test",Lit 2)]
-    --{if((Var iets <= 3)){Wait;}Call iets 5;if((Var iets <= 3)){Turn_left;}}
-    readpgm <- readFile "line.txt";
+    readpgm <- readFile "pgm4.txt";
     print (show (apply parsePgm (rTnN readpgm)));
 
 }

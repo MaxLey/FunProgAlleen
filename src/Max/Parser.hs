@@ -1,3 +1,7 @@
+-- Parser.hs
+-- Maximiliaan Leyman
+-- Op basis van parser gezien in de les door Christophe Scholliers
+
 module Parser
 ( Parser
 , apply
@@ -107,7 +111,6 @@ parseNeg = do token '-'
 parseInt :: Parser Int
 parseInt = parseNat `mplus` parseNeg
 
--- Match a word
--- TODO maybe
+-- Match a single word
 parseWord :: Parser String
 parseWord = plus (spot (\s -> (s /= ' ') && (s /= ')') && (s /= ';')));

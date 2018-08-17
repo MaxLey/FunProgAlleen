@@ -1,3 +1,7 @@
+-- MonadPlus.hs
+-- Maximiliaan Leyman
+-- GHCi vond MonadPlus elders precies niet, dus heb ik het hier zelf ingezet om hem te kunnen gebruiken.
+
 module MonadPlus
 ( MonadPlus
 , mzero

@@ -1,13 +1,13 @@
 {
-Call grens 30;
+call grens 30;
 while(True){
-	Dist see;
+	dist see;
 	if((Var see <= Var grens)){
-		Turn_right;
+		turn_right;
 	}
 	if((Var grens <= Var see)){
-		Forward;
+		forward;
 	}
-	Wait 1;
+	wait 1;
 }
 }
