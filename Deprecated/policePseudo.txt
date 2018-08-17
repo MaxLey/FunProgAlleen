@@ -1,7 +1,0 @@
-WHILE (TRUE):
-	setRGB 1 255 0 0
-	setRGB 2 255 0 0
-	WAIT 1
-	setRGB 1 0 0 255
-	setRGB 2 0 0 255
-	WAIT 1
