@@ -1,0 +1,12 @@
+{
+call iets 2;
+if((Var iets <= 3)){
+	wait 1;
+}
+call iets 5;
+if((Var iets <= 3)){
+	#Hier laat ik de robot naar links draaien#
+	turn_left;
+}
+while((Var iets <= 10)){call iets (Var iets+1);}
+}

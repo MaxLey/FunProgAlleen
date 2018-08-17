@@ -18,7 +18,7 @@ import System.HIDAPI
 -- Het programma om uit te voeren kan aangepast worden door de string bij readFile aan te passen.
 
 main = do {
-    readpgm <- readFile "avoid.txt";
+    readpgm <- readFile "police.txt";
     bot <- openMBot;
     evalStateT (runPgm (parse parsePgm (rTnN readpgm)) bot) [];
     closeMBot bot
